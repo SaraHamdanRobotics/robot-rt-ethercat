@@ -6,6 +6,16 @@ A simple real-time control loop for industrial robot drives using EtherCAT.
 
 This project demonstrates a minimal real-time control loop for industrial robot drives using EtherCAT. The goal is to build a low-level control system from scratch to understand real-time communication, drive state machines, and deterministic execution.
 
+For a detailed introduction to EtherCAT setup and configuration, see [simple_intro.md](simple_intro.md).
+
+## Context (Robotics)
+
+This project is part of building a real-time control stack for robotic manipulators (6-DoF arms), where deterministic communication and low-level control are critical for:
+
+- motion control
+- safety
+- synchronization across joints
+
 ## Features
 
 - EtherCAT master using IgH stack
