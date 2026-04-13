@@ -61,10 +61,10 @@ static ec_sync_info_t slave_syncs[] = {
 // Domain registration
 // from pdos.txt:
 static ec_pdo_entry_reg_t domain_regs[] = {
-    {0, 0, VENDOR_ID, PRODUCT_ID, 0x6040, 0, &off_control_word},
-    {0, 0, VENDOR_ID, PRODUCT_ID, 0x607A, 0, &off_target_position},
-    {0, 0, VENDOR_ID, PRODUCT_ID, 0x6041, 0, &off_status_word},
-    {0, 0, VENDOR_ID, PRODUCT_ID, 0x6064, 0, &off_actual_position},
+    {0, 4, VENDOR_ID, PRODUCT_ID, 0x6040, 0, &off_control_word},
+    {0, 4, VENDOR_ID, PRODUCT_ID, 0x607A, 0, &off_target_position},
+    {0, 4, VENDOR_ID, PRODUCT_ID, 0x6041, 0, &off_status_word},
+    {0, 4, VENDOR_ID, PRODUCT_ID, 0x6064, 0, &off_actual_position},
     {}
 };
 
@@ -95,8 +95,8 @@ int main()
         return -1;
     }
 
-    // 3. Configure slave (position 0)
-    sc = ecrt_master_slave_config(master, 0, 0, VENDOR_ID, PRODUCT_ID);
+    // 3. Configure slave (slave: 4)
+    sc = ecrt_master_slave_config(master, 0, 4, VENDOR_ID, PRODUCT_ID);
     if (!sc) {
         std::cerr << "Failed to config slave\n";
         return -1;
@@ -159,13 +159,13 @@ int main()
         
 
         if (!target_set && status == 0x1237) {
-            target = position + 1000;   // very small step
+            target = position + 1000;   // very small step [motor specific, exp: for Elmo Gold, 1000 = 1 degree] 
             target_set = true;
         }
 
         // to keep position unchanged, use the following:
         // EC_WRITE_S32(domain_pd + off_target_position, position);
-        
+
         EC_WRITE_S32(domain_pd + off_target_position, target_set ? target : position);
 
 
@@ -175,6 +175,11 @@ int main()
 
         usleep(1000); // 1 ms
     }
+
+    // Cleanup: disable motor before exit
+    EC_WRITE_U16(domain_pd + off_control_word, 0x0000);
+    ecrt_domain_queue(domain);
+    ecrt_master_send(master);
 
     std::cout << "Stopping...\n";
     return 0;
